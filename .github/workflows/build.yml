@@ -39,112 +39,6 @@ env:
   BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
 
 jobs:
-  ubuntu-latest-cmake:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Clone
-        id: checkout
-        uses: actions/checkout@v3
-        with:
-          submodules: recursive
-
-      - name: Dependencies
-        id: depends
-        run: |
-          sudo apt-get update
-          sudo apt-get install build-essential
-
-      - name: Build
-        id: cmake_build
-        run: |
-          mkdir build
-          cd build
-          cmake .. -DGGML_AVX2=ON -DSD_BUILD_SHARED_LIBS=ON
-          cmake --build . --config Release
-
-      - name: Get commit hash
-        id: commit
-        if: ${{ ( github.event_name == 'push' && github.ref == 'refs/heads/main' ) || github.event.inputs.create_release == 'true' }}
-        uses: pr-mpt/actions-commit-hash@v2
-
-      - name: Fetch system info
-        id: system-info
-        run: |
-          echo "CPU_ARCH=`uname -m`" >> "$GITHUB_OUTPUT"
-          echo "OS_NAME=`lsb_release -s -i`" >> "$GITHUB_OUTPUT"
-          echo "OS_VERSION=`lsb_release -s -r`" >> "$GITHUB_OUTPUT"
-          echo "OS_TYPE=`uname -s`" >> "$GITHUB_OUTPUT"
-
-      - name: Pack artifacts
-        id: pack_artifacts
-        if: ${{ ( github.event_name == 'push' && github.ref == 'refs/heads/master' ) || github.event.inputs.create_release == 'true' }}
-        run: |
-          cp ggml/LICENSE ./build/bin/ggml.txt
-          cp LICENSE ./build/bin/stable-diffusion.cpp.txt
-          zip -j sd-${{ env.BRANCH_NAME }}-${{ steps.commit.outputs.short }}-bin-${{ steps.system-info.outputs.OS_TYPE }}-${{ steps.system-info.outputs.OS_NAME }}-${{ steps.system-info.outputs.OS_VERSION }}-${{ steps.system-info.outputs.CPU_ARCH }}.zip ./build/bin/*
-
-      - name: Upload artifacts
-        if: ${{ ( github.event_name == 'push' && github.ref == 'refs/heads/master' ) || github.event.inputs.create_release == 'true' }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: sd-${{ env.BRANCH_NAME }}-${{ steps.commit.outputs.short }}-bin-${{ steps.system-info.outputs.OS_TYPE }}-${{ steps.system-info.outputs.OS_NAME }}-${{ steps.system-info.outputs.OS_VERSION }}-${{ steps.system-info.outputs.CPU_ARCH }}.zip
-          path: |
-            sd-${{ env.BRANCH_NAME }}-${{ steps.commit.outputs.short }}-bin-${{ steps.system-info.outputs.OS_TYPE }}-${{ steps.system-info.outputs.OS_NAME }}-${{ steps.system-info.outputs.OS_VERSION }}-${{ steps.system-info.outputs.CPU_ARCH }}.zip
-
-  macOS-latest-cmake:
-    runs-on: macos-latest
-
-    steps:
-      - name: Clone
-        id: checkout
-        uses: actions/checkout@v3
-        with:
-          submodules: recursive
-
-      - name: Dependencies
-        id: depends
-        run: |
-          brew install zip
-
-      - name: Build
-        id: cmake_build
-        run: |
-          sysctl -a
-          mkdir build
-          cd build
-          cmake .. -DGGML_AVX2=ON -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" -DSD_BUILD_SHARED_LIBS=ON
-          cmake --build . --config Release
-
-      - name: Get commit hash
-        id: commit
-        if: ${{ ( github.event_name == 'push' && github.ref == 'refs/heads/main' ) || github.event.inputs.create_release == 'true' }}
-        uses: pr-mpt/actions-commit-hash@v2
-
-      - name: Fetch system info
-        id: system-info
-        run: |
-          echo "CPU_ARCH=`uname -m`" >> "$GITHUB_OUTPUT"
-          echo "OS_NAME=`sw_vers -productName`" >> "$GITHUB_OUTPUT"
-          echo "OS_VERSION=`sw_vers -productVersion`" >> "$GITHUB_OUTPUT"
-          echo "OS_TYPE=`uname -s`" >> "$GITHUB_OUTPUT"
-
-      - name: Pack artifacts
-        id: pack_artifacts
-        if: ${{ ( github.event_name == 'push' && github.ref == 'refs/heads/master' ) || github.event.inputs.create_release == 'true' }}
-        run: |
-          cp ggml/LICENSE ./build/bin/ggml.txt
-          cp LICENSE ./build/bin/stable-diffusion.cpp.txt
-          zip -j sd-${{ env.BRANCH_NAME }}-${{ steps.commit.outputs.short }}-bin-${{ steps.system-info.outputs.OS_TYPE }}-${{ steps.system-info.outputs.OS_NAME }}-${{ steps.system-info.outputs.OS_VERSION }}-${{ steps.system-info.outputs.CPU_ARCH }}.zip ./build/bin/*
-
-      - name: Upload artifacts
-        if: ${{ ( github.event_name == 'push' && github.ref == 'refs/heads/master' ) || github.event.inputs.create_release == 'true' }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: sd-${{ env.BRANCH_NAME }}-${{ steps.commit.outputs.short }}-bin-${{ steps.system-info.outputs.OS_TYPE }}-${{ steps.system-info.outputs.OS_NAME }}-${{ steps.system-info.outputs.OS_VERSION }}-${{ steps.system-info.outputs.CPU_ARCH }}.zip
-          path: |
-            sd-${{ env.BRANCH_NAME }}-${{ steps.commit.outputs.short }}-bin-${{ steps.system-info.outputs.OS_TYPE }}-${{ steps.system-info.outputs.OS_NAME }}-${{ steps.system-info.outputs.OS_VERSION }}-${{ steps.system-info.outputs.CPU_ARCH }}.zip
-
   windows-latest-cmake:
     runs-on: windows-2019
 
@@ -167,7 +61,7 @@ jobs:
           # - build: "rocm5.5"
           #   defines: '-G Ninja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DSD_HIPBLAS=ON -DCMAKE_BUILD_TYPE=Release -DAMDGPU_TARGETS="gfx1100;gfx1102;gfx1030" -DSD_BUILD_SHARED_LIBS=ON'
           - build: 'vulkan'
-            defines: "-DSD_VULKAN=ON -DGGML_AVX=OFF -DGGML_AVX2=OFF -DGGML_FMA=OFF -DSD_BUILD_SHARED_LIBS=ON"
+            defines: "-DSD_VULKAN=ON -DGGML_AVX=OFF -DGGML_AVX2=OFF -DGGML_FMA=OFF -DSD_BUILD_SHARED_LIBS=ON -DGGML_CPU_ALL_VARIANTS=ON"
     steps:
       - name: Clone
         id: checkout
