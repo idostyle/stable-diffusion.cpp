@@ -1358,7 +1358,7 @@ sd_image_t* generate_image(sd_ctx_t* sd_ctx,
         gguf_add_tensor(cond_ctx, cond.c_concat);
     }
 
-    gguf_write_to_file(cond_ctx, cond_fname);
+    gguf_write_to_file(cond_ctx, cond_fname, false);
     gguf_free(cond_ctx);
     
     SDCondition uncond;
