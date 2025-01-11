@@ -1345,6 +1345,22 @@ sd_image_t* generate_image(sd_ctx_t* sd_ctx,
                                                                            height,
                                                                            sd_ctx->sd->diffusion_model->get_adm_in_channels());
 
+    const char * cond_fname = "cond.gguf";
+    struct gguf_context * cond_ctx =  gguf_init_empty();
+
+    if (cond.c_crossattn != NULL) {
+        gguf_add_tensor(cond_ctx, cond.c_crossattn);
+    }
+    if (cond.c_vector != NULL) {
+        gguf_add_tensor(cond_ctx, cond.c_vector);
+    }
+    if (cond.c_concat != NULL) {
+        gguf_add_tensor(cond_ctx, cond.c_concat);
+    }
+
+    gguf_write_to_file(cond_ctx, cond_fname);
+    gguf_free(cond_ctx);
+    
     SDCondition uncond;
     if (cfg_scale != 1.0) {
         bool force_zero_embeddings = false;
