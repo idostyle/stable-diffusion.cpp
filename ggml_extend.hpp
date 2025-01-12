@@ -1175,9 +1175,9 @@ public:
         }
 
         ggml_backend_graph_compute(backend, gf);
-#ifdef GGML_PERF
+
         ggml_graph_print(gf);
-#endif
+
         if (output != NULL) {
             auto result = ggml_graph_node(gf, -1);
             if (*output == NULL && output_ctx != NULL) {
