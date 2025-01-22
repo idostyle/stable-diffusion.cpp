@@ -83,7 +83,7 @@ jobs:
           mkdir build
           cd build
           cmake .. ${{ matrix.defines }}
-          cmake --build . --config Release
+          cmake --build . --config Debug
           
       - name: Get commit hash
         id: commit
@@ -99,6 +99,11 @@ jobs:
             echo "Exists at path $filePath"
             Copy-Item ggml/LICENSE .\build\bin\Release\ggml.txt
             Copy-Item LICENSE .\build\bin\Release\stable-diffusion.cpp.txt
+          } elseif (Test-Path ".\build\bin\Debug\stable-diffusion.dll") {
+          $filePath = ".\build\bin\Debug\*"
+            echo "Exists at path $filePath"
+            Copy-Item ggml/LICENSE .\build\bin\Debug\ggml.txt
+            Copy-Item LICENSE .\build\bin\Debug\stable-diffusion.cpp.txt
           } elseif (Test-Path ".\build\bin\stable-diffusion.dll") {
           $filePath = ".\build\bin\*"
             echo "Exists at path $filePath"
