@@ -1309,11 +1309,11 @@ public:
             out = ggml_add(ctx, act, b);
         }
 
+        auto ne = x->ne[0];
         auto im = ggml_mul_mat(ctx, x, w);
-        auto ne = im->ne[0];
         
         auto empty = ggml_new_tensor_1d(ctx, GGML_TYPE_F32, ne);
-        auto eyev = ggml_set_f32(eye, 1.0f);
+        auto eyev = ggml_set_f32(empty, 1.0f);
         auto eye = ggml_diag(ctx, eyev);
         auto imm = ggml_mul_mat(ctx, im, eye);
         auto ims = ggml_sum_rows(ctx, imm);
@@ -1324,7 +1324,7 @@ public:
         print_ggml_tensor(w, true, "imatrix w");
         print_ggml_tensor(act, true, "imatrix act");
         print_ggml_tensor(im, true, "imatrix im");
-        print_ggml_tensor(imv, true, "imatrix imv");
+        print_ggml_tensor(imv, false, "imatrix imv");
         return out == NULL ? act : out;
     }
 };
