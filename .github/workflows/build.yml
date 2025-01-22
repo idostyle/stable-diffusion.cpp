@@ -83,7 +83,7 @@ jobs:
           mkdir build
           cd build
           cmake .. ${{ matrix.defines }} -DCMAKE_MSVC_DEBUG_INFORMATION_FORMAT="Embedded"
-          cmake --build . --config Debug -DCMAKE_MSVC_DEBUG_INFORMATION_FORMAT="Embedded"
+          cmake --build . --config Debug
           
       - name: Get commit hash
         id: commit
