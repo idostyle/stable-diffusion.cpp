@@ -82,7 +82,7 @@ jobs:
         run: |
           mkdir build
           cd build
-          cmake .. ${{ matrix.defines }}
+          cmake .. ${{ matrix.defines }} -DCMAKE_MSVC_DEBUG_INFORMATION_FORMAT="$<$<CONFIG:Debug,RelWithDebInfo>:Embedded>"
           cmake --build . --config Debug
           
       - name: Get commit hash
