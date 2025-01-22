@@ -1309,9 +1309,9 @@ public:
             out = ggml_add(ctx, act, b);
         }
 
-        auto ne = im->ne[0];
-
         auto im = ggml_mul_mat(ctx, x, w);
+        auto ne = im->ne[0];
+        
         auto empty = ggml_new_tensor_1d(ctx, GGML_TYPE_F32, ne);
         auto eyev = ggml_set_f32(eye, 1.0f);
         auto eye = ggml_diag(ctx, eyev);
