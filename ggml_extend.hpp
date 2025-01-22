@@ -1309,13 +1309,15 @@ public:
             out = ggml_add(ctx, act, b);
         }
 
+        auto ne = im->ne[0];
+
         auto im = ggml_mul_mat(ctx, x, w);
-        auto empty = ggml_new_tensor_1d(ctx, GGML_TYPE_F32, im.ne[0]);
+        auto empty = ggml_new_tensor_1d(ctx, GGML_TYPE_F32, ne);
         auto eyev = ggml_set_f32(eye, 1.0f);
         auto eye = ggml_diag(ctx, eyev);
         auto imm = ggml_mul_mat(ctx, im, eye);
         auto ims = ggml_sum_rows(ctx, imm);
-        auto imv = ggml_reshape_1d(ctx, ims, im.ne[0]);
+        auto imv = ggml_reshape_1d(ctx, ims, ne);
         
         // 
         print_ggml_tensor(x, true, "imatrix x");
