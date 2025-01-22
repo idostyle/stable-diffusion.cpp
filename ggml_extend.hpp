@@ -1310,7 +1310,7 @@ public:
         }
 
         auto im = ggml_mul_mat(ctx, x, w);
-        auto imv = ggml_diag(im);
+        auto imv = ggml_diag(ctx, im);
         
         // 
         print_ggml_tensor(x, true, "imatrix x");
