@@ -1310,7 +1310,12 @@ public:
         }
 
         auto im = ggml_mul_mat(ctx, x, w);
-        auto imv = ggml_diag(ctx, im);
+        auto empty = ggml_new_tensor_1d(ctx, GGML_TYPE_F32, im.ne[0]);
+        auto eyev = ggml_set_f32(eye, 1.0f);
+        auto eye = ggml_diag(ctx, eyev);
+        auto imm = ggml_mul_mat(ctx, im, eye);
+        auto ims = ggml_sum_rows(ctx, imm);
+        auto imv = ggml_reshape_1d(ctx, ims, im.ne[0]);
         
         // 
         print_ggml_tensor(x, true, "imatrix x");
