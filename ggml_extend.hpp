@@ -1300,9 +1300,12 @@ public:
         if (bias) {
             b = params["bias"];
         }
-        auto out = ggml_nn_linear(ctx, x, w, b);
-        print_ggml_tensor(out, true, "imatrix");
-        return out;
+        auto act = ggml_nn_linear(ctx, x, w, NULL);
+        // 
+        print_ggml_tensor(x, true, "imatrix x");
+        print_ggml_tensor(w, true, "imatrix w");
+        print_ggml_tensor(act, true, "imatrix act");
+        return ggml_nn_linear(ctx, x, w, b);
     }
 };
 
