@@ -68,29 +68,6 @@ jobs:
         uses: actions/checkout@v3
         with:
           submodules: recursive
-
-      - name: Install cuda-toolkit
-        id: cuda-toolkit
-        if: ${{ matrix.build == 'cuda12' }}
-        uses: Jimver/cuda-toolkit@v0.2.11
-        with:
-          cuda: "12.2.0"
-          method: "network"
-          sub-packages: '["nvcc", "cudart", "cublas", "cublas_dev", "thrust", "visual_studio_integration"]'
-
-      - name: Install rocm-toolkit
-        id: rocm-toolkit
-        if: ${{ matrix.build == 'rocm5.5' }}
-        uses: Cyberhan123/rocm-toolkit@v0.1.0
-        with:
-          rocm: "5.5.0"
-
-      - name: Install Ninja
-        id: install-ninja
-        if: ${{ matrix.build == 'rocm5.5' }}
-        uses: urkle/action-get-ninja@v1
-        with:
-          version: 1.11.1
       - name: Install Vulkan SDK
         id: get_vulkan
         if: ${{ matrix.build == 'vulkan' }}
@@ -107,20 +84,7 @@ jobs:
           cd build
           cmake .. ${{ matrix.defines }}
           cmake --build . --config Release
-
-      - name: Check AVX512F support
-        id: check_avx512f
-        if: ${{ matrix.build == 'avx512' }}
-        continue-on-error: true
-        run: |
-          cd build
-          $vcdir = $(vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath)
-          $msvc = $(join-path $vcdir $('VC\Tools\MSVC\'+$(gc -raw $(join-path $vcdir 'VC\Auxiliary\Build\Microsoft.VCToolsVersion.default.txt')).Trim()))
-          $cl =  $(join-path $msvc 'bin\Hostx64\x64\cl.exe')
-          echo 'int main(void){unsigned int a[4];__cpuid(a,7);return !(a[1]&65536);}' >> avx512f.c
-          & $cl /O2 /GS- /kernel avx512f.c /link /nodefaultlib /entry:main
-          .\avx512f.exe && echo "AVX512F: YES" && ( echo HAS_AVX512F=1 >> $env:GITHUB_ENV ) || echo "AVX512F: NO"
-
+          
       - name: Get commit hash
         id: commit
         if: ${{ ( github.event_name == 'push' && github.ref == 'refs/heads/master' ) || github.event.inputs.create_release == 'true' }}
@@ -145,23 +109,6 @@ jobs:
             throw "Can't find stable-diffusion.dll"
           }
           7z a sd-${{ env.BRANCH_NAME }}-${{ steps.commit.outputs.short }}-bin-win-${{ matrix.build }}-x64.zip $filePath
-
-      - name: Copy and pack Cuda runtime
-        id: pack_cuda_runtime
-        if: ${{ ( github.event_name == 'push' && github.ref == 'refs/heads/master' && matrix.build == 'cuda12' ) || github.event.inputs.create_release == 'true' }}
-        run: |
-          echo "Cuda install location: ${{steps.cuda-toolkit.outputs.CUDA_PATH}}"
-          $dst='.\build\bin\cudart\'
-          robocopy "${{steps.cuda-toolkit.outputs.CUDA_PATH}}\bin" $dst cudart64_*.dll cublas64_*.dll cublasLt64_*.dll
-          7z a cudart-sd-bin-win-cu12-x64.zip $dst\*
-
-      - name: Upload Cuda runtime
-        if: ${{ ( github.event_name == 'push' && github.ref == 'refs/heads/master' && matrix.build == 'cuda12' ) || github.event.inputs.create_release == 'true' }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: sd-cudart-sd-bin-win-cu12-x64.zip
-          path: |
-            cudart-sd-bin-win-cu12-x64.zip
 
       - name: Upload artifacts
         if: ${{ ( github.event_name == 'push' && github.ref == 'refs/heads/master' ) || github.event.inputs.create_release == 'true' }}
