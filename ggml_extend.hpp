@@ -1300,12 +1300,25 @@ public:
         if (bias) {
             b = params["bias"];
         }
-        auto act = ggml_nn_linear(ctx, x, w, NULL);
+
+        struct ggml_tensor* act = NULL;
+        struct ggml_tensor* out = NULL;
+        
+        act = ggml_mul_mat(ctx, w, x);
+        if (b != NULL) {
+            out = ggml_add(ctx, act, b);
+        }
+
+        auto im = ggml_mul_mat(ctx, x, w);
+        auto imv = ggml_diag(im);
+        
         // 
         print_ggml_tensor(x, true, "imatrix x");
         print_ggml_tensor(w, true, "imatrix w");
         print_ggml_tensor(act, true, "imatrix act");
-        return ggml_nn_linear(ctx, x, w, b);
+        print_ggml_tensor(im, true, "imatrix im");
+        print_ggml_tensor(imv, true, "imatrix imv");
+        return out == NULL ? act : out;
     }
 };
 
