@@ -1311,12 +1311,12 @@ public:
 
         auto ne = x->ne[0];
         auto im = ggml_mul_mat(ctx, x, w);
-        
-        auto empty = ggml_new_tensor_1d(ctx, GGML_TYPE_F32, ne);
-        auto eyev = ggml_set_f32(empty, 1.0f);
-        auto eye = ggml_diag(ctx, eyev);
-        auto imm = ggml_mul_mat(ctx, im, eye);
-        auto ims = ggml_sum_rows(ctx, imm);
+
+        auto a = ggml_diag_mask_zero(ctx, im, 0);
+        auto b = ggml_transpose(ctx, a);
+        auto c = ggml_diag_mask_zero(ctx, b, 0);
+        auto d = ggml_transpose(ctx, c);
+        auto ims = ggml_sum_rows(ctx, d);
         auto imv = ggml_reshape_1d(ctx, ims, ne);
         
         // 
