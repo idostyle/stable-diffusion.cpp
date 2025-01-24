@@ -1313,10 +1313,10 @@ public:
         auto im = ggml_mul_mat(ctx, x, w);
 
         auto a = ggml_diag_mask_zero(ctx, im, 0);
-        auto b = ggml_transpose(ctx, a);
-        auto c = ggml_diag_mask_zero(ctx, b, 0);
-        auto d = ggml_transpose(ctx, c);
-        auto ims = ggml_sum_rows(ctx, d);
+        auto c = ggml_transpose(ctx, a);
+        auto d = ggml_diag_mask_zero(ctx, c, 0);
+        auto e = ggml_transpose(ctx, d);
+        auto ims = ggml_sum_rows(ctx, e);
         auto imv = ggml_reshape_1d(ctx, ims, ne);
         
         // 
