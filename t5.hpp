@@ -675,15 +675,13 @@ public:
             int64_t model_dim,
             int64_t inner_dim,
             int64_t ff_dim,
-            int64_t num_heads,
-            int64_t projection_dim)
+            int64_t num_heads)
         : num_layers(num_layers) {
         for (int i = 0; i < num_layers; i++) {
             blocks["block." + std::to_string(i)] = std::shared_ptr<GGMLBlock>(new T5Block(model_dim, inner_dim, ff_dim, num_heads, i == 0));
         }
 
         blocks["final_layer_norm"] = std::shared_ptr<GGMLBlock>(new T5LayerNorm(model_dim));
-        blocks["final_projection"] = std::shared_ptr<GGMLBlock>(new T5Projection(model_dim, projection_dim));
     }
 
     struct ggml_tensor* forward(struct ggml_context* ctx,
@@ -703,9 +701,6 @@ public:
         auto final_layer_norm = std::dynamic_pointer_cast<T5LayerNorm>(blocks["final_layer_norm"]);
 
         x = final_layer_norm->forward(ctx, x);
-
-        auto final_projection = std::dynamic_pointer_cast<T5Projection>(blocks["final_projection"]);
-        x = final_projection->forward(ctx, x);
         
         return x;
     }
@@ -719,8 +714,9 @@ public:
        int64_t num_heads,
        int64_t vocab_size,
        int64_t projection_dim) {
-        blocks["encoder"] = std::shared_ptr<GGMLBlock>(new T5Stack(num_layers, model_dim, model_dim, ff_dim, num_heads, projection_dim));
+        blocks["encoder"] = std::shared_ptr<GGMLBlock>(new T5Stack(num_layers, model_dim, model_dim, ff_dim, num_heads));
         blocks["shared"]  = std::shared_ptr<GGMLBlock>(new Embedding(vocab_size, model_dim));
+        blocks["final_projection"] = std::shared_ptr<GGMLBlock>(new T5Projection(model_dim, projection_dim));
     }
 
     struct ggml_tensor* forward(struct ggml_context* ctx,
@@ -735,6 +731,9 @@ public:
 
         auto x = shared->forward(ctx, input_ids);
         x      = encoder->forward(ctx, x, past_bias, attention_mask, relative_position_bucket);
+
+        auto final_projection = std::dynamic_pointer_cast<T5Projection>(blocks["final_projection"]);
+        x = final_projection->forward(ctx, x);
         return x;
     }
 };
