@@ -650,7 +650,7 @@ public:
 
 struct T5Projection : public UnaryBlock {
 public:
-    T5DenseActDense(int64_t model_dim, int64_t projection_dim) {
+    T5Projection(int64_t model_dim, int64_t projection_dim) {
         blocks["0"] = std::shared_ptr<GGMLBlock>(new Linear(model_dim, projection_dim, false));
         blocks["3"] = std::shared_ptr<GGMLBlock>(new Linear(projection_dim, projection_dim, false));
     }
