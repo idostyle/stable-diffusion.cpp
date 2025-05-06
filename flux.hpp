@@ -204,7 +204,7 @@ namespace Flux {
             // return: [ModulationOut, ModulationOut]
             auto lin = std::dynamic_pointer_cast<Linear>(blocks["lin"]);
 
-            auto out = ggml_silu(ctx, vec);
+            auto out = ggml_silu_inplace(ctx, vec);
             out      = lin->forward(ctx, out);  // [N, multiplier*dim]
 
             auto m = ggml_reshape_3d(ctx, out, vec->ne[0], multiplier, vec->ne[1]);  // [N, multiplier, dim]
@@ -235,8 +235,8 @@ namespace Flux {
         // shift: [N, C]
         scale = ggml_reshape_3d(ctx, scale, scale->ne[0], 1, scale->ne[1]);  // [N, 1, C]
         shift = ggml_reshape_3d(ctx, shift, shift->ne[0], 1, shift->ne[1]);  // [N, 1, C]
-        x     = ggml_add(ctx, x, ggml_mul(ctx, x, scale));
-        x     = ggml_add(ctx, x, shift);
+        x     = ggml_add_inplace(ctx, x, ggml_mul(ctx, x, scale));
+        x     = ggml_add_inplace(ctx, x, shift);
         return x;
     }
 
@@ -346,22 +346,22 @@ namespace Flux {
             img_attn_out      = ggml_cont(ctx, ggml_permute(ctx, img_attn_out, 0, 2, 1, 3));  // [N, n_img_token, hidden_size]
 
             // calculate the img bloks
-            img = ggml_add(ctx, img, ggml_mul(ctx, img_attn->post_attention(ctx, img_attn_out), img_mod1.gate));
+            img = ggml_add_inplace(ctx, img, ggml_mul(ctx, img_attn->post_attention(ctx, img_attn_out), img_mod1.gate));
 
             auto img_mlp_out = img_mlp_0->forward(ctx, Flux::modulate(ctx, img_norm2->forward(ctx, img), img_mod2.shift, img_mod2.scale));
             img_mlp_out      = ggml_gelu_inplace(ctx, img_mlp_out);
             img_mlp_out      = img_mlp_2->forward(ctx, img_mlp_out);
 
-            img = ggml_add(ctx, img, ggml_mul(ctx, img_mlp_out, img_mod2.gate));
+            img = ggml_add_inplace(ctx, img, ggml_mul(ctx, img_mlp_out, img_mod2.gate));
 
             // calculate the txt bloks
-            txt = ggml_add(ctx, txt, ggml_mul(ctx, txt_attn->post_attention(ctx, txt_attn_out), txt_mod1.gate));
+            txt = ggml_add_inplace(ctx, txt, ggml_mul(ctx, txt_attn->post_attention(ctx, txt_attn_out), txt_mod1.gate));
 
             auto txt_mlp_out = txt_mlp_0->forward(ctx, Flux::modulate(ctx, txt_norm2->forward(ctx, txt), txt_mod2.shift, txt_mod2.scale));
             txt_mlp_out      = ggml_gelu_inplace(ctx, txt_mlp_out);
             txt_mlp_out      = txt_mlp_2->forward(ctx, txt_mlp_out);
 
-            txt = ggml_add(ctx, txt, ggml_mul(ctx, txt_mlp_out, txt_mod2.gate));
+            txt = ggml_add_inplace(ctx, txt, ggml_mul(ctx, txt_mlp_out, txt_mod2.gate));
 
             return {img, txt};
         }
@@ -448,7 +448,7 @@ namespace Flux {
             auto attn_mlp = ggml_concat(ctx, attn, ggml_gelu_inplace(ctx, mlp), 0);  // [N, n_token, hidden_size + mlp_hidden_dim]
             auto output   = linear2->forward(ctx, attn_mlp);                         // [N, n_token, hidden_size]
 
-            output = ggml_add(ctx, x, ggml_mul(ctx, output, mod.gate));
+            output = ggml_add_inplace(ctx, x, ggml_mul(ctx, output, mod.gate));
             return output;
         }
     };
@@ -473,7 +473,7 @@ namespace Flux {
             auto linear             = std::dynamic_pointer_cast<Linear>(blocks["linear"]);
             auto adaLN_modulation_1 = std::dynamic_pointer_cast<Linear>(blocks["adaLN_modulation.1"]);
 
-            auto m = adaLN_modulation_1->forward(ctx, ggml_silu(ctx, c));  // [N, 2 * hidden_size]
+            auto m = adaLN_modulation_1->forward(ctx, ggml_silu_inplace(ctx, c));  // [N, 2 * hidden_size]
             m      = ggml_reshape_3d(ctx, m, c->ne[0], 2, c->ne[1]);       // [N, 2, hidden_size]
             m      = ggml_cont(ctx, ggml_permute(ctx, m, 0, 2, 1, 3));     // [2, N, hidden_size]
 
@@ -741,10 +741,10 @@ namespace Flux {
                 auto guidance_in = std::dynamic_pointer_cast<MLPEmbedder>(blocks["guidance_in"]);
                 // bf16 and fp16 result is different
                 auto g_in = ggml_nn_timestep_embedding(ctx, guidance, 256, 10000, 1000.f);
-                vec       = ggml_add(ctx, vec, guidance_in->forward(ctx, g_in));
+                vec       = ggml_add_inplace(ctx, vec, guidance_in->forward(ctx, g_in));
             }
 
-            vec = ggml_add(ctx, vec, vector_in->forward(ctx, y));
+            vec = ggml_add_inplace(ctx, vec, vector_in->forward(ctx, y));
             txt = txt_in->forward(ctx, txt);
 
             for (int i = 0; i < params.depth; i++) {
