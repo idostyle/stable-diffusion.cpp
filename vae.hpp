@@ -56,7 +56,7 @@ public:
             x = nin_shortcut->forward(ctx, x);  // [N, out_channels, h, w]
         }
 
-        h = ggml_add(ctx, h, x);
+        h = ggml_add_inplace(ctx, h, x);
         return h;  // [N, out_channels, h, w]
     }
 };
@@ -109,7 +109,7 @@ public:
 
         h_ = proj_out->forward(ctx, h_);  // [N, in_channels, h, w]
 
-        h_ = ggml_add(ctx, h_, x);
+        h_ = ggml_add_inplace(ctx, h_, x);
         return h_;
     }
 };
@@ -206,7 +206,7 @@ public:
         x = time_stack->forward(ctx, x);  // b t c (h w)
 
         float alpha = get_alpha();
-        x           = ggml_add(ctx,
+        x           = ggml_add_inplace(ctx,
                                ggml_scale(ctx, x, alpha),
                                ggml_scale(ctx, x_mix, 1.0f - alpha));
 
