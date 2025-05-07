@@ -1,4 +1,4 @@
 [submodule "ggml"]
     path = ggml
     url = https://github.com/idostyle/ggml.git
-    brabch = sd
+    branch = sd
