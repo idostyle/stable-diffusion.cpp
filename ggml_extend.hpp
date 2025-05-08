@@ -1041,7 +1041,7 @@ protected:
     }
 
 struct ggml_gallocr * ggml_gallocr_new_n_multi(ggml_backend_buffer_type_t * bufts, int n_bufs) {
-    struct ggml_gallocr * galloc = (ggml_gallocr_t)calloc(1, sizeof(struct ggml_gallocr));
+    struct ggml_gallocr * galloc = (struct ggml_gallocr *)calloc(1, sizeof(struct ggml_gallocr));
     GGML_ASSERT(galloc != NULL);
 
     galloc->bufts = calloc(n_bufs, sizeof(ggml_backend_buffer_type_t));
@@ -1089,8 +1089,8 @@ struct ggml_gallocr * ggml_gallocr_new_n_multi(ggml_backend_buffer_type_t * buft
 
         int total_n_half = (n_nodes + n_leafs) / 2;
 
-        int node_buffer_ids[n_nodes];
-        int leaf_buffer_ids[n_leafs];
+        int * node_buffer_ids = (int *)calloc(n_nodes, sizeof(int));
+        int * leaf_buffer_ids = (int *)calloc(n_leafs, sizeof(int));
 
         for (int i = 0; i < n_nodes; i++) {
             node_buffer_ids[i] = i < total_n_half ? 0 : 1;
