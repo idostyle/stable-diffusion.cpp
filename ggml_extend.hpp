@@ -1055,23 +1055,17 @@ protected:
         
         compute_allocr = ggml_gallocr_new_n(bufts, 2);
 
-        int n_nodes = gf->n_nodes;
-        int n_leafs = gf->n_leafs;
+        int n_nodes = ggml_graph_n_nodes(gf);
 
-        int total_n_half = (n_nodes + n_leafs) / 2;
+        int total_n_half = n_nodes / 2;
 
         int * node_buffer_ids = (int *)calloc(n_nodes, sizeof(int));
-        int * leaf_buffer_ids = (int *)calloc(n_leafs, sizeof(int));
 
         for (int i = 0; i < n_nodes; i++) {
             node_buffer_ids[i] = i < total_n_half ? 0 : 1;
         }
 
-        for (int i = 0; i < n_leafs; i++) {
-            leaf_buffer_ids[i] = (n_nodes + i) < total_n_half ? 0 : 1;
-        }
-
-        if (!ggml_gallocr_reserve_n(compute_allocr, gf, node_buffer_ids, leaf_buffer_ids)) {
+        if (!ggml_gallocr_reserve_n(compute_allocr, gf, node_buffer_ids, null)) {
             // failed to allocate the compute buffer
             LOG_ERROR("%s: failed to allocate the compute buffer\n", get_desc().c_str());
             free_compute_buffer();
