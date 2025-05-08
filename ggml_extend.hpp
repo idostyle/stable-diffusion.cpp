@@ -1040,35 +1040,6 @@ protected:
         }
     }
 
-struct ggml_gallocr * ggml_gallocr_new_n_multi(ggml_backend_buffer_type_t * bufts, int n_bufs) {
-    struct ggml_gallocr * galloc = (struct ggml_gallocr *)calloc(1, sizeof(void *) * 8 + sizeof(int) * 4 + 256);
-    GGML_ASSERT(galloc != NULL);
-
-    galloc->bufts = calloc(n_bufs, sizeof(ggml_backend_buffer_type_t));
-    GGML_ASSERT(galloc->bufts != NULL);
-
-    galloc->buffers = calloc(n_bufs, sizeof(ggml_backend_buffer_t));
-    GGML_ASSERT(galloc->buffers != NULL);
-
-    galloc->buf_tallocs = calloc(n_bufs, sizeof(struct ggml_dyn_tallocr *));
-    GGML_ASSERT(galloc->buf_tallocs != NULL);
-
-    for (int i = 0; i < n_bufs; i++) {
-        galloc->bufts[i] = bufts[i];
-        galloc->buffers[i] = NULL;
-
-        // don't check if the same buffer type is used multiple times
-
-        if (galloc->buf_tallocs[i] == NULL) {
-            size_t alignment = ggml_backend_buft_get_alignment(bufts[i]);
-            galloc->buf_tallocs[i] = ggml_dyn_tallocr_new(alignment);
-        }
-    }
-    galloc->n_buffers = n_bufs;
-
-    return galloc;
-}
-
     bool alloc_compute_buffer(get_graph_cb_t get_graph) {
         if (compute_allocr != NULL) {
             return true;
@@ -1082,7 +1053,9 @@ struct ggml_gallocr * ggml_gallocr_new_n_multi(ggml_backend_buffer_type_t * buft
             ggml_backend_get_default_buffer_type(backend)
         };
         
-        compute_allocr = ggml_gallocr_new_n_multi(bufts, 2);
+        compute_allocr = ggml_gallocr_new_n(bufts, 2);
+        size_t alignment = ggml_backend_buft_get_alignment(compute_allocr->bufts[1]);
+        compute_allocr->->buf_tallocs[1] = ggml_dyn_tallocr_new(alignment);
 
         int n_nodes = gf->n_nodes;
         int n_leafs = gf->n_leafs;
