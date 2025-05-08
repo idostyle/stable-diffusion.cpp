@@ -1084,13 +1084,13 @@ struct ggml_gallocr * ggml_gallocr_new_n_multi(ggml_backend_buffer_type_t * buft
         
         compute_allocr = ggml_gallocr_new_n_multi(bufts, 2);
 
-        inf n_nodes = gf->n_nodes;
+        int n_nodes = gf->n_nodes;
         int n_leafs = gf->n_leafs;
 
         int total_n_half = (n_nodes + n_leafs) / 2;
 
-        const int node_buffer_ids[n_nodes];
-        const int leaf_buffer_ids[n_leafs];
+        int node_buffer_ids[n_nodes];
+        int leaf_buffer_ids[n_leafs];
 
         for (int i = 0; i < n_nodes; i++) {
             node_buffer_ids[i] = i < total_n_half ? 0 : 1;
