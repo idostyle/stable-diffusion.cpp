@@ -1054,8 +1054,6 @@ protected:
         };
         
         compute_allocr = ggml_gallocr_new_n(bufts, 2);
-        size_t alignment = ggml_backend_buft_get_alignment(compute_allocr->bufts[1]);
-        compute_allocr->->buf_tallocs[1] = ggml_dyn_tallocr_new(alignment);
 
         int n_nodes = gf->n_nodes;
         int n_leafs = gf->n_leafs;
