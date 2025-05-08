@@ -1040,8 +1040,8 @@ protected:
         }
     }
 
-ggml_gallocr_t ggml_gallocr_new_n_multi(ggml_backend_buffer_type_t * bufts, int n_bufs) {
-    ggml_gallocr_t galloc = (ggml_gallocr_t)calloc(1, sizeof(struct ggml_gallocr));
+struct ggml_gallocr * ggml_gallocr_new_n_multi(ggml_backend_buffer_type_t * bufts, int n_bufs) {
+    struct ggml_gallocr * galloc = (ggml_gallocr_t)calloc(1, sizeof(struct ggml_gallocr));
     GGML_ASSERT(galloc != NULL);
 
     galloc->bufts = calloc(n_bufs, sizeof(ggml_backend_buffer_type_t));
