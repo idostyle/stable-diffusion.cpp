@@ -1041,7 +1041,7 @@ protected:
     }
 
 struct ggml_gallocr * ggml_gallocr_new_n_multi(ggml_backend_buffer_type_t * bufts, int n_bufs) {
-    struct ggml_gallocr * galloc = (struct ggml_gallocr *)calloc(1, sizeof(struct ggml_gallocr));
+    struct ggml_gallocr * galloc = (struct ggml_gallocr *)calloc(1, sizeof(void *) * 8 + sizeof(int) * 4 + 256);
     GGML_ASSERT(galloc != NULL);
 
     galloc->bufts = calloc(n_bufs, sizeof(ggml_backend_buffer_type_t));
