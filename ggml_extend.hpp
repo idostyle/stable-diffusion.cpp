@@ -1065,7 +1065,7 @@ protected:
             node_buffer_ids[i] = i < total_n_half ? 0 : 1;
         }
 
-        if (!ggml_gallocr_reserve_n(compute_allocr, gf, node_buffer_ids, null)) {
+        if (!ggml_gallocr_reserve_n(compute_allocr, gf, node_buffer_ids, NULL)) {
             // failed to allocate the compute buffer
             LOG_ERROR("%s: failed to allocate the compute buffer\n", get_desc().c_str());
             free_compute_buffer();
