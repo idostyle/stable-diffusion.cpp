@@ -1054,13 +1054,10 @@ protected:
         compute_allocr = ggml_gallocr_new_n_multi(bufts, 2);
 
         int n_nodes = ggml_graph_n_nodes(gf);
-
-        int total_n_half = n_nodes / 2;
-
         int * node_buffer_ids = (int *)calloc(n_nodes, sizeof(int));
 
         for (int i = 0; i < n_nodes; i++) {
-            node_buffer_ids[i] = i < total_n_half ? 0 : 1;
+            node_buffer_ids[i] = i % 2;
         }
 
         if (!ggml_gallocr_reserve_n(compute_allocr, gf, node_buffer_ids, NULL)) {
