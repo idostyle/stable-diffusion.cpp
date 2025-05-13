@@ -1273,11 +1273,17 @@ protected:
     bool force_f32;
 
     void init_params(struct ggml_context* ctx, std::map<std::string, enum ggml_type>& tensor_types, const std::string prefix = "") {
-        enum ggml_type wtype = (tensor_types.find(prefix + "weight") != tensor_types.end()) ? tensor_types[prefix + "weight"] : GGML_TYPE_F32;
-        if (in_features % ggml_blck_size(wtype) != 0 || force_f32) {
-            wtype = GGML_TYPE_F32;
+        if (tensor_types.find(prefix + "A") != tensor_types.end()) {
+            params["A"] = ggml_new_tensor_2d(ctx, wtype, in_features, 64);
+            params["B"] = ggml_new_tensor_2d(ctx, wtype, 64, out_features);
+        } else {
+            enum ggml_type wtype = (tensor_types.find(prefix + "weight") != tensor_types.end()) ? tensor_types[prefix + "weight"] : GGML_TYPE_F32;
+            if (in_features % ggml_blck_size(wtype) != 0 || force_f32) {
+                wtype = GGML_TYPE_F32;
+            }
+            params["weight"] = ggml_new_tensor_2d(ctx, wtype, in_features, out_features);
         }
-        params["weight"] = ggml_new_tensor_2d(ctx, wtype, in_features, out_features);
+
         if (bias) {
             enum ggml_type wtype = GGML_TYPE_F32;  //(tensor_types.ypes.find(prefix + "bias") != tensor_types.end()) ? tensor_types[prefix + "bias"] : GGML_TYPE_F32;
             params["bias"]       = ggml_new_tensor_1d(ctx, wtype, out_features);
@@ -1295,12 +1301,22 @@ public:
           force_f32(force_f32) {}
 
     struct ggml_tensor* forward(struct ggml_context* ctx, struct ggml_tensor* x) {
-        struct ggml_tensor* w = params["weight"];
-        struct ggml_tensor* b = NULL;
-        if (bias) {
-            b = params["bias"];
+        if (params.find("A") != tensor_types.end()) {
+            struct ggml_tensor* down = params["A"];
+            struct ggml_tensor* up = params["B"];
+            struct ggml_tensor* b = NULL;
+            if (bias) {
+                b = params["bias"];
+            }
+            return ggml_nn_linear(ctx, ggml_nn_linear(ctx, x, down, NULL), up, b);
+        } else {
+            struct ggml_tensor* w = params["weight"];
+            struct ggml_tensor* b = NULL;
+            if (bias) {
+                b = params["bias"];
+            }
+            return ggml_nn_linear(ctx, x, w, b);
         }
-        return ggml_nn_linear(ctx, x, w, b);
     }
 };
 
