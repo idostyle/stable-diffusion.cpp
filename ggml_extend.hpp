@@ -1274,6 +1274,7 @@ protected:
 
     void init_params(struct ggml_context* ctx, std::map<std::string, enum ggml_type>& tensor_types, const std::string prefix = "") {
         if (tensor_types.find(prefix + "A") != tensor_types.end()) {
+            enum ggml_type wtype = tensor_types[prefix + "A"];
             params["A"] = ggml_new_tensor_2d(ctx, wtype, in_features, 64);
             params["B"] = ggml_new_tensor_2d(ctx, wtype, 64, out_features);
         } else {
