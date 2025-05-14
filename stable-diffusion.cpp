@@ -537,7 +537,7 @@ public:
             LOG_INFO("running in Flux FLOW mode");
             float shift = 1.0f;  // TODO: validate
             for (auto pair : model_loader.tensor_storages_types) {
-                if (pair.first.find("model.diffusion_model.guidance_in.in_layer.weight") != std::string::npos) {
+                if (pair.first.find("model.diffusion_model.guidance_in.in_layer.weight") != std::string::npos || pair.first.find("model.diffusion_model.guidance_in.in_layer.A") != std::string::npos) {
                     shift = 1.15f;
                     break;
                 }
