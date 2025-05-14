@@ -1302,7 +1302,7 @@ public:
           force_f32(force_f32) {}
 
     struct ggml_tensor* forward(struct ggml_context* ctx, struct ggml_tensor* x) {
-        if (params.find("A") != tensor_types.end()) {
+        if (params.find("A") != params.end()) {
             struct ggml_tensor* down = params["A"];
             struct ggml_tensor* up = params["B"];
             struct ggml_tensor* b = NULL;
