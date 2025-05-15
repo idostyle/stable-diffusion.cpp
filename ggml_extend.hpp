@@ -1297,7 +1297,7 @@ protected:
                 rank = 128;
             } else if (prefix.find("time_in.out_layer") != std::string::npos) {
                 rank = 768;
-            } else if (prefix.find"txt_in") != std::string::npos) {
+            } else if (prefix.find("txt_in") != std::string::npos) {
                 rank = 960;
             } else if (prefix.find("vector_in.in_layer") != std::string::npos) {
                 rank = 256;
