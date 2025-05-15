@@ -1301,7 +1301,7 @@ protected:
                 rank = 960;
             } else if (prefix.find("vector_in.in_layer") != std::string::npos) {
                 rank = 256;
-            } else if (prefix.find("vector_in.in_layer") != std::string::npos) {
+            } else if (prefix.find("vector_in.out_layer") != std::string::npos) {
                 rank = 576;
             } else if (prefix.find("final_layer.adaLN_modulation") != std::string::npos) {
                 rank = 1088;
